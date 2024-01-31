@@ -1,0 +1,138 @@
+{
+    "parse_text_cases": {
+        "pass": [
+            {
+                "name": "parse_empty", 
+                "input": "",
+                "expected": []
+            },
+            {
+                "name": "parse_single_label", 
+                "input": "citizen",
+                "expected": ["citizen"]
+            },
+            {
+                "name": "parse_path", 
+                "input": "citizen.kane.rosebud",
+                "expected": ["citizen", "kane", "rosebud"]
+            },
+            {
+                "name": "parse_multiple_words", 
+                "input": "citizen.kane.rosebud.1941",
+                "expected": ["citizen", "kane", "rosebud", "1941"]
+            },
+            {
+                "name": "parse_with_hypens_underscores", 
+                "input": "citizen-kane.rosebud_1941",
+                "expected": ["citizen-kane", "rosebud_1941"]
+            },
+            {
+                "name": "parse_multiple_words_multibyte", 
+                "input": "unicode.is.cool.ضβ𝒽-պהङ٢৪",
+                "expected": ["unicode", "is", "cool", "ضβ𝒽-պהङ٢৪"]
+            }            
+        ], 
+        "fail": [
+            {
+                "name": "parse_bad_single_label1", 
+                "input": " ",
+                "message": "Parse error: Invalid character at 0"
+            },
+            {
+                "name": "parse_bad_delim_start1", 
+                "input": ".",
+                "message": "Parse error: Expected label at 0"
+            },
+            {
+                "name": "parse_bad_delim_start2", 
+                "input": ".kane",
+                "message": "Parse error: Expected label at 0"
+            },
+            {
+                "name": "parse_bad_delim_end", 
+                "input": "citizen.kane.",
+                "message": "Parse error: Expected label at 13"
+            },
+            {
+                "name": "parse_bad_double_delim", 
+                "input": "citizen..kane",
+                "message": "Parse error: Expected label at 8"
+            },
+            {
+                "name": "parse_bad_label1", 
+                "input": "citizen.$kane",
+                "message": "Parse error: Invalid character at 8"
+            },
+            {
+                "name": "parse_bad_label2", 
+                "input": "citizen. kane",
+                "message": "Parse error: Invalid character at 8"
+            },
+            {
+                "name": "parse_bad_label_over_1000_ascii_codepoints", 
+                "input": "citizen.kane1234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345123451234512345",
+                "message": "Parse error: Label too long (max 1000 UTF-8 scalar values)"
+            },
+            {
+                "name": "parse_bad_label_over_1000_multibyte_codepoints", 
+                "input": "rune.b.ᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒᛒ",
+                "message": "Parse error: Label too long (max 1000 UTF-8 scalar values)"
+            }
+        ]
+    },
+    "string_conv_cases": {
+        "pass": [
+            {
+                "name": "string_conv_empty",
+                "input": [],
+                "expected": ""
+            },
+            {
+                "name": "string_conv_simple_ascii",
+                "input": ["what", "is", "love"],
+                "expected": "what.is.love"
+            },
+            {
+                "name": "string_conv_simple_multibyte1",
+                "input": ["ᛒaby", "dont", "hurt", "ᛖe"],
+                "expected": "ᛒaby.dont.hurt.ᛖe"
+            },
+            {
+                "name": "string_conv_simple_multibyte2",
+                "input": ["unicode", "is", "cool", "ضβ𝒽-պהङ٢৪"],
+                "expected": "unicode.is.cool.ضβ𝒽-պהङ٢৪"
+            }
+        ],
+        "fail": []
+    },
+    "join_cases": {
+        "pass": [
+            {
+                "name": "join_empty1",
+                "input": [[], []],
+                "expected": ""
+            },
+            {
+                "name": "join_empty2",
+                "input": [[], ["citizen"]],
+                "expected": "citizen"
+            },
+            {
+                "name": "join_empty3",
+                "input": [["citizen"], [""]],
+                "expected": "citizen"
+            },
+            {
+                "name": "join_non_empty1",
+                "input": [["citizen"], ["kane"]],
+                "expected": "citizen.kane"
+            },
+            {
+                "name": "join_non_empty2",
+                "input": [["citizen", "kane"], ["rosebud", "1941"]],
+                "expected": "citizen.kane.rosebud.1941"
+            }
+        ],
+        "fail": []
+    }
+}
