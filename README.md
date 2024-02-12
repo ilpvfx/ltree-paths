@@ -12,6 +12,12 @@ from multiple languages.
 
 See each subdirectory for information about testing for that particular language.
 
+## Implementation details
+
+### Python
+- Memory errors in Rust will yield a PyOxide panic exception.
+- Converting a string into a path may fail if the string contains lone surrogate characters. Typically this would happen on corrupted input or a purposefully broken Unicode string.
+
 ## Postgres details
 
 ### Sources

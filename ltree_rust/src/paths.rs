@@ -36,7 +36,8 @@ mod paths_tests;
 ///
 /// Due to the storage format, iteration over labels is fairly expensive. If there is a need for
 /// extensive manipulation, in the middle or beginning of a path, it is likely better to work with a
-/// sequence of labels. When all is said and done, they can be joined cheaply.
+/// sequence of labels. When all is said and done, they can be joined cheaply. This can be done
+/// through the [LTreePathBuf] type.
 ///
 /// # Paths
 /// A path consists of ltree labels, separated by dots (`.` U+002E).
@@ -265,8 +266,9 @@ impl LTreePathBuf {
 }
 
 impl From<LTreePath> for LTreePathBuf {
+    /// Converts a path into a buf. This is much faster than splitting the string since the buf can
+    /// be sure that the labels are valid.
     fn from(value: LTreePath) -> Self {
-        // No need to validate the labels as LTreePath forces validation on the user.
         LTreePathBuf {
             labels: value.labels().map(ToOwned::to_owned).collect(),
         }

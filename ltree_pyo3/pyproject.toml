@@ -1,0 +1,17 @@
+[project]
+name = "pyltree"
+
+[build-system]
+requires = ["maturin>=1.0,<2.0"]
+build-backend = "maturin"
+
+[project.optional-dependencies]
+tests = [
+  "pytest",
+]
+
+[tool.maturin]
+# This indicates that our python package is actually in a subdirectory.
+python-source = "python"
+# This names our Rust module such that it is a submodule to the Python module.
+module-name = "pyltree.pyltree_core"

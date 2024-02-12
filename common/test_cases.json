@@ -36,37 +36,37 @@
             {
                 "name": "parse_bad_single_label1", 
                 "input": " ",
-                "message": "Parse error: Invalid character at 0"
+                "message": "Parse error: Invalid character at offset 0"
             },
             {
                 "name": "parse_bad_delim_start1", 
                 "input": ".",
-                "message": "Parse error: Expected label at 0"
+                "message": "Parse error: Expected label at offset 0"
             },
             {
                 "name": "parse_bad_delim_start2", 
                 "input": ".kane",
-                "message": "Parse error: Expected label at 0"
+                "message": "Parse error: Expected label at offset 0"
             },
             {
                 "name": "parse_bad_delim_end", 
                 "input": "citizen.kane.",
-                "message": "Parse error: Expected label at 13"
+                "message": "Parse error: Expected label at offset 13"
             },
             {
                 "name": "parse_bad_double_delim", 
                 "input": "citizen..kane",
-                "message": "Parse error: Expected label at 8"
+                "message": "Parse error: Expected label at offset 8"
             },
             {
                 "name": "parse_bad_label1", 
                 "input": "citizen.$kane",
-                "message": "Parse error: Invalid character at 8"
+                "message": "Parse error: Invalid character at offset 8"
             },
             {
                 "name": "parse_bad_label2", 
                 "input": "citizen. kane",
-                "message": "Parse error: Invalid character at 8"
+                "message": "Parse error: Invalid character at offset 8"
             },
             {
                 "name": "parse_bad_label_over_1000_ascii_codepoints", 

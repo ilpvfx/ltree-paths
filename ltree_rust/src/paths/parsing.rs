@@ -15,10 +15,10 @@ impl Display for LTreePathParseError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             LTreePathParseError::ExpectedLabel(loc) => {
-                write!(f, "Parse error: Expected label at {}", loc)
+                write!(f, "Parse error: Expected label at offset {}", loc)
             }
             LTreePathParseError::InvalidCharacter(loc) => {
-                write!(f, "Parse error: Invalid character at {}", loc)
+                write!(f, "Parse error: Invalid character at offset {}", loc)
             }
             LTreePathParseError::LabelTooLong => write!(
                 f,
