@@ -18,6 +18,10 @@ See each subdirectory for information about testing for that particular language
 - Memory errors in Rust will yield a PyOxide panic exception.
 - Converting a string into a path may fail if the string contains lone surrogate characters. Typically this would happen on corrupted input or a purposefully broken Unicode string.
 
+### Go
+- Formatting an LTreePath is not supported atm.
+- Builder type is on the TODO list.
+
 ## Postgres details
 
 ### Sources

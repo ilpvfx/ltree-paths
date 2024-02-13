@@ -171,7 +171,7 @@ impl LTreePath {
         self.value.split(Self::DELIMITER).filter(|s| !s.is_empty())
     }
 
-    // Don't expose this right now, it could force us into a specific internal implementation.
+    // Note (siot): Don't expose this to outside code right now. Keep the API small.
     pub(self) fn len(&self) -> usize {
         self.value.len()
     }
