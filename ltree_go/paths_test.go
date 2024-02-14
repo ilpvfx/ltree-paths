@@ -8,6 +8,9 @@ import (
 	"slices"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 type LTreePathSimple = []string
@@ -48,35 +51,27 @@ type CommonTestCases struct {
 const COMMON_TEST_SUITE_PATH_RELATIVE = "../common/test_cases.json"
 
 func RunParseTextCases(t *testing.T, cases *ParseTextCases) {
+
 	for _, v := range cases.Pass {
 		t.Logf("Parse Pass Case %s input: <%s>", v.Name, v.Input)
 
-		if path, err := NewLTreePath(v.Input); err == nil {
-			// We have to filter out empty strings, as split on an empty string returns an empty string.
-			actual := slices.DeleteFunc(
-				strings.Split(path.String(), "."),
-				func(s string) bool { return len(s) == 0 })
+		path, err := NewLTreePath(v.Input)
+		require.Nil(t, err)
 
-			if !slices.Equal(v.Expected, actual) {
-				t.Errorf(
-					"expected %v but got %v (beware, []string{} and []string{\"\"} prints the same)",
-					v.Expected,
-					actual)
-			}
-		} else {
-			t.Errorf("Parsing failed: %v", err)
-		}
+		// We have to filter out empty strings, as split on an empty string returns an empty string.
+		actual := slices.DeleteFunc(
+			strings.Split(path.String(), "."),
+			func(s string) bool { return len(s) == 0 })
+
+		assert.Equal(t, v.Expected, actual)
 	}
 
 	for _, v := range cases.Fail {
 		t.Logf("Parse Fail Case: %s input: <%s>", v.Name, v.Input)
 
-		p, err := NewLTreePath(v.Input)
-		if err == nil {
-			t.Errorf("Expected an error! Got <%v> (err = <%v>)", p, err)
-		} else if err.Error() != v.Message {
-			t.Errorf("Should fail with [%v] not [%v]", v.Message, err)
-		}
+		_, err := NewLTreePath(v.Input)
+		require.NotNil(t, err)
+		assert.Equal(t, v.Message, err.Error())
 	}
 }
 
@@ -87,9 +82,8 @@ func RunStringConvCases(t *testing.T, cases *StringConvCases) {
 		path1, _ := NewLTreePath(strings.Join(v.Input, "."))
 
 		actual := path1.String()
-		if v.Expected != actual {
-			t.Errorf("expected <%v> not <%v>", v.Expected, actual)
-		}
+
+		assert.Equal(t, v.Expected, actual)
 	}
 
 	for _, v := range cases.Fail {
@@ -106,14 +100,9 @@ func RunJoinCases(t *testing.T, cases *JoinCases) {
 		path2, _ := NewLTreePath(strings.Join(v.Input[1], "."))
 
 		actual, err := path1.Join(path2)
+		require.Nil(t, err)
 
-		if err != nil {
-			t.Error(err)
-		}
-
-		if v.Expected != actual.String() {
-			t.Errorf("expected <%v> not <%v>", v.Expected, actual)
-		}
+		assert.Equal(t, v.Expected, actual.String())
 	}
 
 	for _, v := range cases.Fail {
@@ -146,14 +135,10 @@ func TestCommon(t *testing.T) {
 
 func TestPathIsEmpty(t *testing.T) {
 	path, _ := NewLTreePath("")
-	if !path.IsEmpty() {
-		t.Errorf("Expected empty path to be reported empty")
-	}
+	require.True(t, path.IsEmpty())
 
 	path, _ = NewLTreePath("a.b.c")
-	if path.IsEmpty() {
-		t.Errorf("Expected non-empty path to be reported non-empty")
-	}
+	require.False(t, path.IsEmpty(), "Non empty path should not be reported empty")
 }
 
 // Make sure this function handles sequences with bad UTF-8 in them. In essence, we want it to split
@@ -170,9 +155,7 @@ func TestSliceLabelsFuncBadUtf(t *testing.T) {
 	})
 
 	expected := []string{"abc\x8Cdef", "123"}
-	if !slices.Equal(expected, labels) {
-		t.Errorf("Expected <%v> not <%v>", expected, labels)
-	}
+	assert.Equal(t, expected, labels)
 }
 
 type DummyError struct{}
@@ -191,14 +174,10 @@ func TestLabelsFunc(t *testing.T) {
 		return nil
 	})
 
-	if err != nil {
-		t.Error(nil)
-	}
+	require.Nil(t, err)
 
 	expected := []string{"abcdef", "123", "ᛒᛒᛒᛒᛒ"}
-	if !slices.Equal(expected, labels) {
-		t.Errorf("Expected <%v> not <%v>", expected, labels)
-	}
+	assert.Equal(t, expected, labels)
 }
 
 func TestLabelsFuncEdgeCases(t *testing.T) {
@@ -225,14 +204,10 @@ func TestLabelsFuncEdgeCases(t *testing.T) {
 		labels = append(labels, s)
 		return nil
 	})
-	if err != stopErr {
-		t.Error("Error returned inside callback was not returned by LabelsByteFunc")
-	}
+	assert.Equal(t, err, stopErr, "Error returned inside callback was not returned by LabelsByteFunc")
 
 	expected := []string{"a", "b"}
-	if !slices.Equal(expected, labels) {
-		t.Errorf("Expected <%v> not <%v>", expected, labels)
-	}
+	assert.Equal(t, expected, labels)
 }
 
 func TestNewLTreePathCountTooLarge(t *testing.T) {
@@ -249,9 +224,8 @@ func TestNewLTreePathCountTooLarge(t *testing.T) {
 		pathPrototype.WriteString(label)
 	}
 
-	if _, err := NewLTreePath(pathPrototype.String()); err == nil {
-		t.Error("Expected error but got none")
-	}
+	_, err := NewLTreePath(pathPrototype.String())
+	require.NotNil(t, err, "The path should be too long and generate an error")
 }
 
 func TestJoinCountTooLarge(t *testing.T) {
@@ -268,19 +242,17 @@ func TestJoinCountTooLarge(t *testing.T) {
 	}
 
 	almostTooLong, err := NewLTreePath(pathPrototype.String())
-	if err != nil {
-		t.Error(err)
-	}
-	thinMintWafer, err := NewLTreePath("a")
-	if err != nil {
-		t.Error(err)
-	}
+	require.Nil(t, err)
 
-	if _, err := almostTooLong.Join(thinMintWafer); err == nil {
-		t.Error("Expected error but got none")
-	}
+	thinMintWafer, err := NewLTreePath("a")
+	require.Nil(t, err)
+
+	_, err = almostTooLong.Join(thinMintWafer)
+	require.NotNil(t, err, "This join should give us a path that is too long")
+
 }
 
+// Note: Do not use testify inside the benchmarks, it seems to have monstrous overhead.
 func BenchmarkCreate(b *testing.B) {
 	cases := []string{
 		"widget-company",
@@ -331,4 +303,13 @@ func BenchmarkJoin(b *testing.B) {
 			}
 		})
 	}
+}
+
+func TestFormat(t *testing.T) {
+	path, _ := NewLTreePath("abc.def.123")
+
+	expected := path.String()
+	actual := fmt.Sprintf("%v", path)
+
+	assert.Equal(t, expected, actual)
 }

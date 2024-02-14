@@ -7,10 +7,10 @@ import (
 	"unicode/utf8"
 )
 
-type ParseErrorCode uint
+type LTreePathErrorCode uint
 
 const (
-	ExpectedLabel ParseErrorCode = iota
+	ExpectedLabel LTreePathErrorCode = iota
 	InvalidCharacter
 	LabelTooLong
 	PathTooLong
@@ -21,7 +21,7 @@ const (
 	BadUnicode
 )
 
-func makeError(code ParseErrorCode, offset uint) *LTreePathError {
+func makeError(code LTreePathErrorCode, offset uint) *LTreePathError {
 	msg := ""
 	switch code {
 	case ExpectedLabel:
@@ -40,33 +40,6 @@ func makeError(code ParseErrorCode, offset uint) *LTreePathError {
 	return &LTreePathError{msg, code}
 }
 
-type parsingState struct {
-	usvOffset    uint
-	bytes        []byte
-	currentLabel currentLabel
-}
-
-func (p *parsingState) ErrorAtCurrentOffset(what ParseErrorCode) error {
-	return makeError(what, p.usvOffset)
-}
-
-func (p *parsingState) BeginLabel() {
-	p.currentLabel = currentLabel{}
-}
-
-func (p *parsingState) Advance(runeWidth int) {
-	p.bytes = p.bytes[runeWidth:]
-	p.usvOffset += 1
-}
-
-func (p *parsingState) IsCurrentLabelEmpty() bool {
-	return p.currentLabel.usvCount == 0
-}
-
-type currentLabel struct {
-	usvCount uint
-}
-
 func runeAllowedInLabels(r rune) bool {
 	const charMinus rune = '-'
 	const charUnderscore rune = '_'
@@ -77,79 +50,92 @@ func runeAllowedInLabels(r rune) bool {
 // Iterate over the byte slices, each slice representing the string separated by CharDelimiter
 //
 // Iteration continues until the callback gives an error or the last string is returned.
+//
+// Note that a string such as ".abc." generates "", "abc", "".
 func sliceLabelsFunc(s string, callback func(s string) error) error {
 	delimiter := string(CharDelimiter)
 	last, rem, found := strings.Cut(s, delimiter)
 	for found {
-		if len(last) > 0 {
-			if err := callback(last); err != nil {
-				return err
-			}
+		if err := callback(last); err != nil {
+			return err
 		}
 		last, rem, found = strings.Cut(rem, delimiter)
 	}
 
-	if len(last) > 0 {
-		if err := callback(last); err != nil {
-			return err
-		}
+	if err := callback(last); err != nil {
+		return err
 	}
 
 	return nil
 }
 
-func validate(s string) error {
-	// TODO (siot): with a small application of some strategy function we could make this adaptible
-	// for the builder later when we want to turn a path into a builder.
+// Decodes the UTF-8 and checks if it is a valid label. Returns the new USV count and any potential
+// error.
+func validateLabel(s string, usvCount uint) (uint, error) {
+	if len(s) == 0 {
+		return usvCount, makeError(ExpectedLabel, usvCount)
+	}
 
+	bytes := []byte(s)
+	var labelUsvCount uint = 0
+
+	for len(bytes) > 0 {
+		r, width := utf8.DecodeRune(bytes)
+		if r == utf8.RuneError {
+			return usvCount, makeError(BadUnicode, usvCount)
+		}
+
+		if runeAllowedInLabels(r) {
+			usvCount += 1
+			labelUsvCount += 1
+
+			if labelUsvCount > MAX_LABEL_USV_COUNT {
+				return usvCount, makeError(LabelTooLong, usvCount)
+			}
+		} else {
+			return usvCount, makeError(InvalidCharacter, usvCount)
+		}
+
+		bytes = bytes[width:]
+	}
+
+	return usvCount, nil
+}
+
+func validate(s string) error {
 	if len(s) == 0 {
 		return nil
 	}
 
 	var labelCount uint = 0
-	p := &parsingState{usvOffset: 0, bytes: []byte(s)}
-	p.BeginLabel()
+	var usvCount uint = 0
 
-	for len(p.bytes) > 0 {
-		r, width := utf8.DecodeRune(p.bytes)
-		if r == utf8.RuneError {
-			return p.ErrorAtCurrentOffset(BadUnicode)
+	err := sliceLabelsFunc(s, func(s string) error {
+		if labelCount > 0 {
+			// We add 1 to represent the "." separating the labels.
+			usvCount += 1
 		}
 
-		if runeAllowedInLabels(r) {
-			p.currentLabel.usvCount += 1
-
-			if p.currentLabel.usvCount > MAX_LABEL_USV_COUNT {
-				return makeError(LabelTooLong, p.usvOffset+1)
-			}
-		} else if r == CharDelimiter {
-			if p.IsCurrentLabelEmpty() {
-				return p.ErrorAtCurrentOffset(ExpectedLabel)
-			}
-
-			labelCount += 1
-
-			if labelCount > MAX_PATH_LABEL_COUNT {
-				return p.ErrorAtCurrentOffset(PathTooLong)
-			}
-
-			p.BeginLabel()
-		} else {
-			return p.ErrorAtCurrentOffset(InvalidCharacter)
+		newUsvCount, err := validateLabel(s, usvCount)
+		if err != nil {
+			return err
 		}
+		usvCount = newUsvCount
 
-		p.Advance(width)
-	}
-
-	// The last label will not end with a delimiter. Thus, we'll have to special case it.
-	if p.IsCurrentLabelEmpty() {
-		return p.ErrorAtCurrentOffset(ExpectedLabel)
-	} else {
 		labelCount += 1
+		if labelCount > MAX_PATH_LABEL_COUNT {
+			return makeError(PathTooLong, usvCount)
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return err
 	}
 
-	if labelCount > MAX_PATH_LABEL_COUNT {
-		return p.ErrorAtCurrentOffset(PathTooLong)
+	if usvCount == 0 && labelCount == 0 {
+		return makeError(ExpectedLabel, usvCount)
 	}
 
 	return nil

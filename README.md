@@ -2,9 +2,9 @@
 Work with LTree paths in multiple languages.
 
 ## Subprojects
-- [ltree_rust](./ltree_rust/): The Rust reference implementation.
-- [ltree_pyo3](./ltree_pyo3): The Python package, built from a Pyo3 Rust source.
-- [ltree_go](./ltree_go): The Go package.
+- [ltree_rust](./ltree_rust/) (ltree_rust): The Rust reference implementation.
+- [ltree_pyo3](./ltree_pyo3) (pyltree): The Python package, built from a Pyo3 Rust source.
+- [ltree_go](./ltree_go) (ltree_go): The Go package.
 
 ## Testing
 The file `common/test_cases.json` contains a set of test cases which are designed to be consumed 
@@ -19,8 +19,9 @@ See each subdirectory for information about testing for that particular language
 - Converting a string into a path may fail if the string contains lone surrogate characters. Typically this would happen on corrupted input or a purposefully broken Unicode string.
 
 ### Go
-- Formatting an LTreePath is not supported atm.
 - Builder type is on the TODO list.
+- Converting a string into a path may fail if the string contains lone surrogate characters or bad UTF-8 bytes. Typically this would happen on corrupted input or a purposefully broken Unicode string.
+
 
 ## Postgres details
 
