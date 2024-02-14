@@ -19,7 +19,6 @@ See each subdirectory for information about testing for that particular language
 - Converting a string into a path may fail if the string contains lone surrogate characters. Typically this would happen on corrupted input or a purposefully broken Unicode string.
 
 ### Go
-- Builder type is on the TODO list.
 - Converting a string into a path may fail if the string contains lone surrogate characters or bad UTF-8 bytes. Typically this would happen on corrupted input or a purposefully broken Unicode string.
 
 
