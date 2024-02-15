@@ -1,5 +1,6 @@
 [project]
 name = "pyltree"
+requires-python = ">= 3.8"
 
 [build-system]
 requires = ["maturin>=1.0,<2.0"]
@@ -15,3 +16,18 @@ tests = [
 python-source = "python"
 # This names our Rust module such that it is a submodule to the Python module.
 module-name = "pyltree.pyltree_core"
+
+[tool.poetry]
+name = "pyltree"
+version = "0.1.0"
+description = "Fast LTree Paths for Python"
+authors = [
+  "Simon Otter <simon.otter@ilpvfx.com>",
+]
+readme = "../README.md"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+
+[tool.poetry.group.test.dependencies]
+pytest = "^8.0.0"

@@ -1,0 +1,91 @@
+name: test
+run-name: Build & test for ${{ github.head_ref }}
+
+on:
+  pull_request:
+    branches:
+      - 'main'
+      - 'release/**'
+
+jobs:
+  #
+  # Test the Rust & Python modules
+  #
+  rust-python-test:
+    runs-on: ubuntu-latest
+    steps:
+      # We need the source.
+      - uses: actions/checkout@v4
+        with:
+          ref: '${{ github.head_ref }}'
+      # We need Python and Rust
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10' 
+      - name: Get poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+      # We need lockfiles to hash on, and we do not have them in our repo, because they are libraries
+      # TODO: maybe there's a better way.
+      - name: Generate lockfiles
+        run: |
+          cd ltree_rust
+          cargo generate-lockfile
+          cd ..
+          cd ltree_pyo3
+          cargo generate-lockfile
+      # Cache Rust and Python pip
+      - name: Setup Cache for Rust & Python
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            **/ltree_pyo3/target/
+            **/ltree_rust/target/
+             ~/.cache/pip
+          key: ${{ runner.os }}-rustpy-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-rustpy-
+      # Test the Rust package first
+      - name: Test Rust
+        run: |
+          cd ltree_rust
+          export RUSTFLAGS='-D warnings'
+          cargo test --release --all-features
+      # Maturin makes packaging easier
+      - name: Test Python
+        run: |
+          cd ltree_pyo3
+          python3 -m venv .venv
+          source .venv/bin/activate
+          pip install maturin
+          poetry install
+          maturin develop
+          pytest .
+  #
+  # Test Go
+  #
+  go-test:
+    runs-on: ubuntu-latest
+    steps:
+      # We need the source.
+      - uses: actions/checkout@v4
+        with:
+          ref: '${{ github.head_ref }}'
+      # Install go
+      - name: Get Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: 'ltree_go/go.mod'
+          cache-dependency-path: |
+            ltree_go/go.sum
+      - name: Run Go tests
+        run: |
+          cd ltree_go
+          go test

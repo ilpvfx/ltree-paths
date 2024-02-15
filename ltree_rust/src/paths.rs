@@ -98,7 +98,7 @@ impl LTreePath {
     ///
     /// Delimiter used between labels, as a string slice for convenience.
     ///
-    pub const DELIMITER_STR: &str = ".";
+    pub const DELIMITER_STR: &'static str = ".";
 
     /// Join two paths and return the result.
     ///
