@@ -13,6 +13,9 @@ jobs:
   #
   rust-python-test:
     runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.head_ref }}-python
+      cancel-in-progress: true
     steps:
       # We need the source.
       - uses: actions/checkout@v4
@@ -21,7 +24,7 @@ jobs:
       # We need Python and Rust
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.10' 
+          python-version: '3.9' 
       - name: Get poetry
         run: |
           curl -sSL https://install.python-poetry.org | python3 -
@@ -37,7 +40,8 @@ jobs:
           cd ..
           cd ltree_pyo3
           cargo generate-lockfile
-      # Cache Rust and Python pip
+      # Cache Rust and Python pip. We set restore-keys to reuse the latest cache even if the key was
+      # not found. This will cut down install time for all the dependencies that did not change.
       - name: Setup Cache for Rust & Python
         uses: actions/cache@v3
         with:
@@ -73,12 +77,15 @@ jobs:
   #
   go-test:
     runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.head_ref }}-go
+      cancel-in-progress: true
     steps:
       # We need the source.
       - uses: actions/checkout@v4
         with:
           ref: '${{ github.head_ref }}'
-      # Install go
+      # Let Go rip
       - name: Get Go
         uses: actions/setup-go@v5
         with:

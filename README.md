@@ -82,6 +82,13 @@ See each subdirectory for information about testing for that particular language
 - Converting a string into a path may fail if the string contains lone surrogate characters or bad UTF-8 bytes. Typically this would happen on corrupted input or a purposefully broken Unicode string.
 
 
+## Versioning
+Due to PyPa versioning constraints, the pre-release tags in this project will follow the PyPa conventions. This makes deployment easier, as we don't have to "translate" tags to another convention.
+
+In essence, a release candidate will use `rc#` as a tag, where # is an integer. For example "1.0.0-rc2".
+
+The full version is still required to be SemVer everywhere except in `pyproject.toml` sections.
+
 ## Postgres details
 
 ### Sources

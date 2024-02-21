@@ -63,9 +63,8 @@ jobs:
             echo "PATCH=$PATCH" >> $GITHUB_OUTPUT
             echo "PRE_RELEASE=$PRE_RELEASE" >> $GITHUB_OUTPUT
             echo "FULL=$FULL" >> $GITHUB_OUTPUT
-            echo "Version check: ✅ ($FULL)" >> $GITHUB_STEP_SUMMARY
+            echo "Version extract: ✅ ($FULL)" >> $GITHUB_STEP_SUMMARY
           else
-            echo "Version check: ❌ failure due to unsupported syntax: ${{ inputs.string }}" >> $GITHUB_STEP_SUMMARY
+            echo "Version extract: ❌ failure due to unsupported syntax: ${{ inputs.string }}" >> $GITHUB_STEP_SUMMARY
             exit 666
           fi
-

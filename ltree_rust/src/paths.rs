@@ -115,6 +115,8 @@ impl LTreePath {
     ///
     /// This operation has `O(n)` time complexity, where n is the total length of the final path.
     pub fn join(&self, other: &Self) -> LTreeParseResult<Self> {
+        // TODO: the logic here is flawed, if we saturate usize, we probably cannot store the 
+        // full string in a String value anyway.
         let capacity = self
             .len()
             .saturating_add(other.len())
