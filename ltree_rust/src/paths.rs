@@ -114,13 +114,15 @@ impl LTreePath {
     /// ```
     ///
     /// This operation has `O(n)` time complexity, where n is the total length of the final path.
+    ///
+    /// **Panics** if the two strings have more than usize bytes in total.
     pub fn join(&self, other: &Self) -> LTreeParseResult<Self> {
-        // TODO: the logic here is flawed, if we saturate usize, we probably cannot store the 
-        // full string in a String value anyway.
         let capacity = self
             .len()
-            .saturating_add(other.len())
-            .saturating_add(Self::DELIMITER_STR.len());
+            .checked_add(other.len())
+            .expect("joining two strings should not overflow an usize")
+            .checked_add(Self::DELIMITER_STR.len())
+            .expect("Joining two strings should not overflow an usize");
 
         let mut final_string = String::with_capacity(capacity);
 
@@ -174,7 +176,7 @@ impl LTreePath {
     }
 
     // Note (siot): Don't expose this to outside code right now. Keep the API small.
-    pub(self) fn len(&self) -> usize {
+    fn len(&self) -> usize {
         self.value.len()
     }
 }
