@@ -61,10 +61,24 @@ println(builder.Path())
 // chariots.of.fire
 ```
 
+## C++ example
+Joining two paths:
+```c++
+#include <ltree/paths.hpp>
+
+auto path1 = ltree::MakePath("my.company.products").path.value();
+auto path2 = ltree::MakePath("icecream.flavour.mintchip").path.value();
+
+auto path3 = ltree::Join(path1, path2).path.value();
+std::cout << path3.ToString() << "\n";
+// my.company.products.icecream.flavour.mintchip
+```
+
 ## Subprojects
 - [ltree_rust](./ltree_rust/) (ltree_rust): The Rust reference implementation.
-- [ltree_pyo3](./ltree_pyo3) (pyltree): The Python package, built from a Pyo3 Rust source.
+- [ltree_pyo3](./ltree_pyo3) (pyltree): The Python package, built from a Pyo3 Rust module.
 - [ltree_go](./ltree_go) (ltree_go): The Go package.
+- [ltree_cpp](./ltree_cpp) (ltree): The C++ library.
 
 ## Testing
 The file `common/test_cases.json` contains a set of test cases which are designed to be consumed 
@@ -76,11 +90,13 @@ See each subdirectory for information about testing for that particular language
 
 ### Python
 - Memory errors in Rust will yield a PyOxide panic exception.
-- Converting a string into a path may fail if the string contains lone surrogate characters. Typically this would happen on corrupted input or a purposefully broken Unicode string.
+- Converting a string into a path may fail if the string contains surrogate codepoints. Typically this would happen on corrupted input or a purposefully broken Unicode string.
 
 ### Go
-- Converting a string into a path may fail if the string contains lone surrogate characters or bad UTF-8 bytes. Typically this would happen on corrupted input or a purposefully broken Unicode string.
+- Converting a string into a path may fail if the string contains surrogate codepoints or bad UTF-8 bytes. Typically this would happen on corrupted input or a purposefully broken Unicode string.
 
+### C++
+- Converting a string into a path may fail if the string contains surrogate codepoints or bad UTF-8 bytes. Typically this would happen on corrupted input or a purposefully broken Unicode string.
 
 ## Versioning
 Due to PyPa versioning constraints, the pre-release tags in this project will follow the PyPa conventions. This makes deployment easier, as we don't have to "translate" tags to another convention.

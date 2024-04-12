@@ -96,3 +96,41 @@ jobs:
         run: |
           cd ltree_go
           go test
+  #
+  # Test Cpp
+  #
+  cpp-test:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.head_ref }}-cpp
+      cancel-in-progress: true
+    steps:
+      # We need the source.
+      - uses: actions/checkout@v4
+        with:
+          ref: '${{ github.head_ref }}'
+      # Prerequisites
+      - name: Get Build system
+        run: |
+          sudo apt install cmake g++-12 cmake ninja-build
+      # Build the C++ sources
+      - name: Build and test
+        run: |
+          mkdir build
+          cd build
+          cmake -D CMAKE_C_COMPILER=gcc-12 -D CMAKE_CXX_COMPILER=g++-12 -D BUILD_TESTING=ON ../ltree_cpp/.
+          make
+
+          # Test the install
+          sudo make install
+
+          # Make sure we can easily access common/
+          cd ..
+
+          # Test the lib
+          echo -e "Catch test output" >> $GITHUB_STEP_SUMMARY
+          echo -e "\x60\x60\x60" >> $GITHUB_STEP_SUMMARY
+
+          build/src/ltree_test >> $GITHUB_STEP_SUMMARY
+
+          echo -e "\x60\x60\x60" >> $GITHUB_STEP_SUMMARY

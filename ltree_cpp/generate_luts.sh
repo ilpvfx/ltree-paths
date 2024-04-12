@@ -1,0 +1,1 @@
+python scripts/unicode_ranges.py --filter Lu,Ll,Lt,Lm,Lo,Nd,Nl,No --format CPP --varname ALPHANUMERIC_RANGES --order RANGE_START scripts/DerivedGeneralCategory.txt > src/internal/unicode_alphanumeric_ranges.incl

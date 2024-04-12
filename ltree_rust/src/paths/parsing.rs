@@ -36,6 +36,8 @@ impl Display for LTreePathParseError {
     }
 }
 
+impl std::error::Error for LTreePathParseError { }
+
 pub type LTreeParseResult<T> = Result<T, LTreePathParseError>;
 
 pub(crate) fn validate_label(s: &str, offset: usize) -> LTreeParseResult<usize> {
