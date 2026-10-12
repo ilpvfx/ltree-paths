@@ -2,6 +2,10 @@
 name = "ltree_pyo3"
 version = "1.0.0-rc3"
 edition = "2021"
+license = "MIT"
+repository = "https://github.com/ilpvfx/ltree-paths"
+# Shipped to PyPI as the `pyltree` wheel, never to crates.io.
+publish = false
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -14,5 +18,5 @@ name = "pyltree_core"
 crate-type = ["cdylib"]
 
 [dependencies.pyo3]
-version = "0.20.2"
+version = "0.29.3"
 features = ["extension-module", "abi3-py39"]

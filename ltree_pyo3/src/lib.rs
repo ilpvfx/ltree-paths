@@ -24,17 +24,17 @@ struct PyLTreePath(LTreePath);
 #[pymethods]
 impl PyLTreePath {
     #[new]
-    fn new(path: &PyAny, py: Python<'_>) -> PyResult<Self> {
+    fn new(path: &Bound<'_, PyAny>, py: Python<'_>) -> PyResult<Self> {
         // FIXME: the error returned when a parse error occurs in the iteration of labels is pretty
         // confusing as it doesn't say which label was bad. This could be improved by at least
         // saying what character it was, not just its position.
-        if let Ok(str_path) = path.downcast::<PyString>() {
-            // see buf_from_iterator why to_str might fail.
-            map_to_py_result(LTreePath::from_str(str_path.to_str()?))
+        if let Ok(str_path) = path.cast::<PyString>() {
+            // see buf_from_iterator why to_cow might fail.
+            map_to_py_result(LTreePath::from_str(&str_path.to_cow()?))
         }
         // We must try the iterator last, as the preceeding Python types may be iterable.
-        else if let Ok(iter) = path.iter() {
-            map_to_py_result(Ok(buf_from_iterator(iter, py)?.to_ltree_path()))
+        else if let Ok(iter) = path.try_iter() {
+            map_to_py_result(Ok(buf_from_iterator(&iter, py)?.to_ltree_path()))
         } else {
             Err(PyTypeError::new_err(
                 "Argument should be empty or an iterable of strings",
@@ -85,7 +85,7 @@ impl PyLTreePath {
 
 #[pyclass(name = "LTreeLabelIterator", module = "pyltree")]
 struct PyLTreeLabelIterator {
-    iter: Box<dyn Iterator<Item = String> + Send>,
+    iter: Box<dyn Iterator<Item = String> + Send + Sync>,
 }
 
 #[pymethods]
@@ -115,7 +115,8 @@ impl PyLTreePathBuilder {
 #[pymethods]
 impl PyLTreePathBuilder {
     #[new]
-    fn new(value: Option<&PyAny>, py: Python<'_>) -> PyResult<PyLTreePathBuilder> {
+    #[pyo3(signature = (value=None))]
+    fn new(value: Option<&Bound<'_, PyAny>>, py: Python<'_>) -> PyResult<PyLTreePathBuilder> {
         if let Some(value) = value {
             // We get better performance by using the conversion of a path into a buf directly,
             // instead of relying on iteration below. This is because the buf knows it doesn't have
@@ -124,8 +125,8 @@ impl PyLTreePathBuilder {
                 Ok(PyLTreePathBuilder {
                     buf: LTreePathBuf::from(path.0.clone()),
                 })
-            } else if let Ok(iter) = value.iter() {
-                buf_from_iterator(iter, py).map(|buf| PyLTreePathBuilder { buf })
+            } else if let Ok(iter) = value.try_iter() {
+                buf_from_iterator(&iter, py).map(|buf| PyLTreePathBuilder { buf })
             } else {
                 Err(PyTypeError::new_err(
                     "Argument should be empty or an iterable of strings",
@@ -152,27 +153,27 @@ impl PyLTreePathBuilder {
 }
 
 #[pymodule]
-fn pyltree_core(py: Python, m: &PyModule) -> PyResult<()> {
+fn pyltree_core(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<PyLTreePath>()?;
     m.add_class::<PyLTreePathBuilder>()?;
-    m.add("ParseError", py.get_type::<PyParseError>())?;
+    m.add("ParseError", m.py().get_type::<PyParseError>())?;
 
     Ok(())
 }
 
-fn buf_from_iterator(iter: &PyIterator, py: Python<'_>) -> PyResult<LTreePathBuf> {
+fn buf_from_iterator(iter: &Bound<'_, PyIterator>, py: Python<'_>) -> PyResult<LTreePathBuf> {
     let mut buf = LTreePathBuf::new();
 
     for next in iter {
         match next {
             Ok(item) => {
-                if let Ok(string_item) = item.downcast::<PyString>() {
-                    // If you are curious as to why to_str can fail here: Python strings have varying
+                if let Ok(string_item) = item.cast::<PyString>() {
+                    // If you are curious as to why to_cow can fail here: Python strings have varying
                     // internal representation depending on the content. It could thus be UCS-2 and
                     // we might have lone surrogate code units which is the one thing we can't
                     // convert into UTF-8.
-                    let str_ref = string_item.to_str()?;
-                    buf.push_label(str_ref.to_owned()).map_err(to_py_err)?;
+                    let str_ref = string_item.to_cow()?;
+                    buf.push_label(str_ref.into_owned()).map_err(to_py_err)?;
                 } else {
                     return Err(PyTypeError::new_err("iterator returned non-string item"));
                 }
