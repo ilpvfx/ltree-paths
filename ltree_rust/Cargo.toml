@@ -2,6 +2,11 @@
 name = "ltree_rust"
 version = "1.0.0-rc3"
 edition = "2021"
+description = "Parse, validate and join PostgreSQL ltree paths"
+license = "MIT"
+repository = "https://github.com/ilpvfx/ltree-paths"
+keywords = ["ltree", "postgresql", "postgres", "path", "hierarchy"]
+categories = ["database", "parser-implementations"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

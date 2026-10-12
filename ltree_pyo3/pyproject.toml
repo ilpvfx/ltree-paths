@@ -1,33 +1,37 @@
 [project]
 name = "pyltree"
-requires-python = ">= 3.8"
+# Taken from Cargo.toml by maturin.
+dynamic = ["version"]
+description = "Fast LTree Paths for Python"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [
+  { name = "Simon Otter", email = "simon.otter@ilpvfx.com" },
+]
+requires-python = ">= 3.9"
+keywords = ["ltree", "postgresql", "postgres", "path", "hierarchy"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Rust",
+  "Topic :: Database",
+  "Typing :: Typed",
+]
 
-[build-system]
-requires = ["maturin>=1.0,<2.0"]
-build-backend = "maturin"
+[project.urls]
+Repository = "https://github.com/ilpvfx/ltree-paths"
+Issues = "https://github.com/ilpvfx/ltree-paths/issues"
 
 [project.optional-dependencies]
 tests = [
-  "pytest",
+  "pytest>=8.0.0",
 ]
+
+[build-system]
+requires = ["maturin>=1.9,<2.0"]
+build-backend = "maturin"
 
 [tool.maturin]
 # This indicates that our python package is actually in a subdirectory.
 python-source = "python"
 # This names our Rust module such that it is a submodule to the Python module.
 module-name = "pyltree.pyltree_core"
-
-[tool.poetry]
-name = "pyltree"
-version = "1.0.0.rc3"
-description = "Fast LTree Paths for Python"
-authors = [
-  "Simon Otter <simon.otter@ilpvfx.com>",
-]
-readme = "../README.md"
-
-[tool.poetry.dependencies]
-python = "^3.8"
-
-[tool.poetry.group.test.dependencies]
-pytest = "^8.0.0"
